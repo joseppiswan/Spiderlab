@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using MelonLoader;
 using UnityEngine;
@@ -6,50 +6,25 @@ using System.Reflection;
 using System.IO;
 using AudioImportLib;
 using UnhollowerRuntimeLib;
-using SLZ.Marrow.Pool;
 using SLZ.Rig;
-using SLZ.Props;
 using Boneworks;
 
 namespace SpiderlabV2
 {
-    public static class EmebeddedAssetBundle
-    {
-        public static AssetBundle LoadFromAssembly(Assembly assembly, string name)
-        {
-            if (assembly.GetManifestResourceNames().Contains(name))
-            {
-                MelonLogger.Msg(ConsoleColor.DarkCyan, "Loading embedded bundle " + name + "...");
-                byte[] arr;
-                using (Stream manifestResourceStream = assembly.GetManifestResourceStream(name))
-                {
-                    using (MemoryStream memoryStream = new MemoryStream())
-                    {
-                        manifestResourceStream.CopyTo(memoryStream);
-                        arr = memoryStream.ToArray();
-                    }
-                }
-                MelonLogger.Msg(ConsoleColor.DarkCyan, "Done!");
-                return AssetBundle.LoadFromMemory(arr);
-            }
-            return null;
-        }
-    }
     public class Main : MelonMod
     {
         float _LowestLimit = float.PositiveInfinity;
         public LineRenderer rrend;
         public LineRenderer lrend;
-        public GameObject light;
         private ConfigurableJoint rjoint;
         private ConfigurableJoint ljoint;
         private Vector3 rtarget;
         private Vector3 ltarget;
         private bool rgrappled = false;
         private bool lgrappled = false;
-        private Material webMat;
         private MelonPreferences_Category categ;
         private MelonPreferences_Entry<float> pull;
+        private MelonPreferences_Entry<float> thickness;
         public static AssetBundle assets;
         public AudioSource source;
         public GameObject webobj;
@@ -58,104 +33,28 @@ namespace SpiderlabV2
         {
             categ = MelonPreferences.CreateCategory("Webs");
             pull = categ.CreateEntry<float>("PullStrength", 1500f);
-            //pull = categ.CreateEntry<float>("WebThickness", 0.1f);
+            thickness = categ.CreateEntry<float>("WebThickness", 0.22f);
         }
         public LineRenderer setupRender()
         {
-            if (!light)
-            {
-                //light = 
-            }
-            PhysicsRig rig = GameObject.FindObjectsOfType<PhysicsRig>().First();
-            //string assetsPath = Path.Combine(MelonUtils.UserDataDirectory, "WebAssets");
-            //var bundle = AssetBundle.LoadFromFile(assetsPath + "/werbthing.webobj");
-            //GameObject webobj = (GameObject)bundle.mainAsset;
-            //UnityEngine.Object asset = 
-
-            //webobj = bundle.LoadAsset("webObj", Il2CppType.Of<GameObject>()).Cast<GameObject>();
-            GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            GameObject temp = new GameObject();
             temp.name = "_SPIDERMAN-MOD-RENDERER";
-            temp.transform.localScale = Vector3.one / 10;
-            temp.transform.position = rig.rightHand.transform.position;
-                 LineRenderer r = temp.AddComponent<LineRenderer>();
-            //r.realtimeLightmapIndex = 1;
-            //GameObject h = UnityEngine.Object.Instantiate(webobj);
-            //Material mat = UnityEngine.Object.Instantiate(webobj.GetComponent<Renderer>().material);//webMaterial();//new Material(Resources.FindObjectsOfTypeAll<Shader>().FirstOrDefault(m => m.name == "Standard"));
-            //    Shader original = Resources.FindObjectsOfTypeAll<Material>().First().shader;
-
-            //  Material mat = new Material(original);//Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.shader.name == "Standard").shader != null ? Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.shader.name == "Standard").shader : Shader.Find(""));
-            //    mat.mainTexture = null;
-            //    mat.color = Color.white;
-            //   r.material = mat;//webMaterial();
-            //            LoggerInstance.Msg(mat.shader.name);
-
-            //LoggerInstance.Msg(Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.name == "ZPEFM_lighting") == null);
-            //if(Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.name == "ZPEFM_lighting") == null)
-            //{
-            //    r.material = constMat();
-
-            //}
-            //else
-            //{
-            //    r.material = Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.name == "ZPEFM_lighting");
-            //}
-            Material m = webMaterial(); // new Material(Shader.Find("Universal Render Pipeline/Lit (PBR Workflow)")); //new Material(webMaterial().shader);//Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(mm => mm.shader.name == "Universal Render Pipeline/Lit (PBR Workflow)").shader);//UnityEngine.Object.Instantiate(webobj.GetComponent<Renderer>().material).shader);
-            //m.color = Color.white;
+            LineRenderer r = temp.AddComponent<LineRenderer>();
+            Material m = webMaterial();
             r.material = m;
-            //m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-            //m.SetInt("_SmoothnessTextureChannel", 0);
-            //m.SetFloat("_Metallic", 0f);
-            //m.SetFloat("_GlossMapScale", 0f);
             temp.GetComponent<Renderer>().material = m;
-            r.SetWidth(0.22f, 0.22f); //0.02f
-            //LineRenderer clone = UnityEngine.Object.Instantiate(webobj.GetComponent<LineRenderer>());
-            return r; //temp.GetComponent<LineRenderer>();
-        }
-        public Material constMat()
-        {
-            Material zpefm = null;
-            AssetSpawner spawner = Resources.FindObjectsOfTypeAll<AssetSpawner>().First();
-            Constrainer con = new Constrainer();
-            //GameObject temp1 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //GameObject temp2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            //temp1.AddComponent<Rigidbody>();
-            //temp1.isStatic = true;
-            //temp2.AddComponent<Rigidbody>();
-            //temp2.isStatic = true;
-                //foreach (var a in spawner._poolList)
-                //    foreach (var b in a.objects)
-                //    {
-                //        if (b.name.Contains("Constrainer"))
-                //        {
-                //            a.Spawn(rig.rightHand.transform.position);
-                //            UnityEngine.Object.Instantiate(b.gameObject, rig.rightHand.transform.position, Quaternion.Euler(0, 0, 0));//new Vector3(0, 25000, 0)
-                //            con = Resources.FindObjectsOfTypeAll<Constrainer>().First();
-                //            zpefm = new Material(con.LineMaterial);
-                //            LoggerInstance.Warning($"ZPEFM NULL:{zpefm == null}");
-                //        }
-                //        LoggerInstance.Warning(b.name);
-                //    }
-            //if (con!=null)
-            //{
-            //    con.JointTether(temp1.GetComponent<Rigidbody>(), temp2.GetComponent<Rigidbody>(), new Vector3(0, 25000, 0), new Vector3(0, 25000, 0));
-            //    zpefm = con.LineMaterial;
-            //}
-            return con.LineMaterial;
+            r.SetWidth(thickness.Value, thickness.Value);
+            return r; 
         }
         public Material webMaterial()
         {
             string assetsPath = Path.Combine(MelonUtils.UserDataDirectory, "WebAssets");
             var bundle = AssetBundle.LoadFromFile(assetsPath + "/spiderfx.sres");
-            //GameObject webobj = (GameObject)bundle.mainAsset;
-            //UnityEngine.Object asset = 
             GameObject webobj = bundle.LoadAsset("SpiderWeb_Renderer", Il2CppType.Of<GameObject>()).Cast<GameObject>();
             GameObject h = UnityEngine.Object.Instantiate(webobj);
-            //GameObject webobj = (GameObject) UnityEngine.Object.Instantiate<UnityEngine.Object>(bundle.LoadAsset("webObj"));
             DrawLine2Points p = h.GetComponent<DrawLine2Points>();
             Material wm = p.Liner.material;
             wm.hideFlags = HideFlags.DontUnloadUnusedAsset;
-            //wm.color = Color.white;
-            LoggerInstance.Msg(wm.shader.name);
             bundle.Unload(false);
             return wm;
         }
@@ -168,6 +67,7 @@ namespace SpiderlabV2
 
         private void line()
         {
+            if (GameObject.FindObjectsOfType<PhysicsRig>().Length == 0) return;
             PhysicsRig rig = GameObject.FindObjectsOfType<PhysicsRig>().First();
             if (rjoint)
             {
@@ -181,7 +81,7 @@ namespace SpiderlabV2
 
         public override void OnUpdate()
         {
-            if (GameObject.FindObjectsOfType<PhysicsRig>().First() == null) return;
+            if (GameObject.FindObjectsOfType<PhysicsRig>().Length == 0) return;
             PhysicsRig rig = GameObject.FindObjectsOfType<PhysicsRig>().First();
             bool hands = rig.rightHand != null && rig.leftHand != null;
             if (hands)
@@ -198,7 +98,6 @@ namespace SpiderlabV2
                 }
                 if (r.GetThumbStickDown() && r.GetGripForce() > 0.5f)
                 {
-                    //LoggerInstance.Msg(AssetDatabase Resources.FindObjectsOfTypeAll<Material>().First().shader.);
                     if (!rrend)
                     {
                         rrend = setupRender();
@@ -211,11 +110,6 @@ namespace SpiderlabV2
                         {
                             try 
                             {
-                                try
-                                {
-                                    //rrend.material = Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.shader.name == "Standard") != null ? Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.shader.name == "Standard") : rrend.material;
-                                }
-                                catch (Exception) { }
                                 rjoint = rig.rightHand.gameObject.AddComponent<ConfigurableJoint>();
                                 LoggerInstance.Msg(LayerMask.LayerToName(rig.rightHand.gameObject.layer));
                                 GameObject c = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -235,7 +129,6 @@ namespace SpiderlabV2
                                 SetSpringLimit(rjoint, 500000000f, 500000f * num * 1);
                                 SetSpringDrive(rjoint, pull.Value, pull.Value, pull.Value);
                                 rjoint.enableCollision = true;
-                                //rrend.gameObject.SetActive(true);
                                 rtarget = h.point;
                                 rrend.positionCount = 2;
                                 string customAudioPath = Path.Combine(MelonUtils.UserDataDirectory, "WebSounds");
@@ -275,11 +168,6 @@ namespace SpiderlabV2
                         {
                             try
                             {
-                                try
-                                {
-                                    //lrend.material = Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.shader.name == "Standard") != null ? Resources.FindObjectsOfTypeAll<Material>().FirstOrDefault(m => m.shader.name == "Standard") : lrend.material;
-                                }
-                                catch (Exception) { }
                                 ljoint = rig.leftHand.gameObject.AddComponent<ConfigurableJoint>();
                                 LoggerInstance.Msg(LayerMask.LayerToName(rig.leftHand.gameObject.layer));
                                 GameObject c = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -299,7 +187,6 @@ namespace SpiderlabV2
                                 SetSpringLimit(ljoint, 500000000f, 500000f * num * 1);
                                 SetSpringDrive(ljoint, pull.Value, pull.Value, pull.Value);
                                 ljoint.enableCollision = true;
-                                //lrend.gameObject.SetActive(true);
                                 ltarget = h.point;
                                 lrend.positionCount = 2;
                                 string customAudioPath = Path.Combine(MelonUtils.UserDataDirectory, "WebSounds");
@@ -327,6 +214,7 @@ namespace SpiderlabV2
                 }
             }
         }
+
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
             UnityEngine.Object.Destroy(ljoint);
@@ -349,6 +237,9 @@ namespace SpiderlabV2
             rgrappled = false;
             lgrappled = false;
         }
+
+
+        //code reused from original mod
         public void SetSpringDrive(ConfigurableJoint joint, float spring, float damper, float max)
         {
             JointDrive jointDrive = new JointDrive
